@@ -1,10 +1,10 @@
 {
-  "name": "slate",
+  "name": "slate-cost",
   "version": "0.1.0",
   "description": "Pre-deploy AWS cost estimation for CDK infrastructure",
   "type": "module",
   "bin": {
-    "slate": "./dist/cli.js"
+    "slate": "dist/cli.js"
   },
   "exports": {
     ".": "./dist/index.js"
@@ -14,10 +14,22 @@
     "dev": "tsx src/cli.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "postinstall": "node scripts/postinstall.js"
   },
-  "keywords": ["aws", "cdk", "cost", "finops", "iac", "pricing"],
+  "keywords": ["aws", "cdk", "cost", "finops", "iac", "pricing", "infrastructure", "estimate"],
   "license": "MIT",
+  "author": "paulwritescode",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paulwritescode/slate.git"
+  },
+  "files": [
+    "dist",
+    "scripts",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=18.0.0"
   },

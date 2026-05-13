@@ -1,4 +1,5 @@
 import { input } from "@inquirer/prompts";
+import chalk from "chalk";
 import { readCostProfile, writeCostProfile } from "../output/yaml.js";
 
 interface FieldMeta {
@@ -104,30 +105,64 @@ export async function runWizard(): Promise<void> {
   }
 
   if (emptyFields.length === 0) {
-    console.log("\n  ✓ All fields in cost-profile.yaml are already filled.\n");
+    console.log(chalk.green("\n  ✓ All fields in cost-profile.yaml are already filled.\n"));
     return;
   }
 
-  console.log(`\n  Found ${emptyFields.length} empty field(s). Let's fill them in.`);
-  console.log("  Press Enter to skip any field and keep the min–max range.\n");
+  // Header
+  console.log("");
+  console.log(chalk.cyan("  ┌──────────────────────────────────────────────────────┐"));
+  console.log(chalk.cyan("  │") + chalk.bold("  Slate Cost Profile Wizard") + chalk.cyan("                            │"));
+  console.log(chalk.cyan("  ├──────────────────────────────────────────────────────┤"));
+  console.log(chalk.cyan("  │") + chalk.dim("  MAU = Monthly Active Users (unique users/month)") + chalk.cyan("     │"));
+  console.log(chalk.cyan("  │") + chalk.dim("  All \"per user\" fields refer to per MAU.") + chalk.cyan("            │"));
+  console.log(chalk.cyan("  └──────────────────────────────────────────────────────┘"));
+  console.log("");
+  console.log(`  Found ${chalk.yellow(emptyFields.length.toString())} empty field(s). Let's fill them in.`);
+  console.log(chalk.dim("  Press Enter to skip any field and keep the min–max range."));
+  console.log(chalk.dim(`  Progress: 0/${emptyFields.length} completed\n`));
 
-  for (const { service, field, path } of emptyFields) {
+  let filled = 0;
+  let skipped = 0;
+
+  for (let i = 0; i < emptyFields.length; i++) {
+    const { service, field, path } = emptyFields[i];
     const meta = FIELD_METADATA[path];
     if (!meta) continue;
 
-    console.log(`\n  ┌─ ${path}`);
-    console.log(`  │  ${meta.description}`);
-    console.log(`  │  Example: ${meta.example}`);
-    console.log(`  │  If skipped: ${meta.rangeDescription}`);
+    const serviceName = service.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    console.log(chalk.cyan(`\n  ┌─ [${i + 1}/${emptyFields.length}] `) + chalk.bold(path));
+    console.log(chalk.cyan("  │  ") + chalk.white(meta.description));
+    console.log(chalk.cyan("  │  ") + chalk.green(`Example: ${meta.example}`));
+    console.log(chalk.cyan("  │  ") + chalk.dim(`If skipped: ${meta.rangeDescription}`));
 
-    const answer = await input({ message: "  └─ Your value (or Enter to skip):" });
+    const answer = await input({
+      message: chalk.cyan("  └─") + " Your value (or Enter to skip):",
+    });
 
     if (answer.trim() !== "") {
       const serviceObj = profile[service] as Record<string, unknown>;
       serviceObj[field] = parseFloat(answer);
+      filled++;
+      console.log(chalk.green(`     ✓ Set to ${answer}`));
+    } else {
+      skipped++;
+      console.log(chalk.dim("     ○ Skipped — will use min–max range"));
     }
   }
 
   await writeCostProfile(profile);
-  console.log("\n  ✓ cost-profile.yaml updated.\n");
+
+  // Summary
+  console.log("");
+  console.log(chalk.cyan("  ┌──────────────────────────────────────────────────────┐"));
+  console.log(chalk.cyan("  │") + chalk.green("  ✓ cost-profile.yaml updated") + chalk.cyan("                          │"));
+  console.log(chalk.cyan("  ├──────────────────────────────────────────────────────┤"));
+  console.log(chalk.cyan("  │") + `  Filled: ${chalk.green(filled.toString())}  Skipped: ${chalk.yellow(skipped.toString())}`.padEnd(55) + chalk.cyan("│"));
+  if (skipped > 0) {
+    console.log(chalk.cyan("  │") + chalk.dim("  Run the wizard again anytime to fill skipped fields.") + chalk.cyan(" │"));
+  }
+  console.log(chalk.cyan("  │") + chalk.dim("  Run: npx slate estimate → see updated costs") + chalk.cyan("         │"));
+  console.log(chalk.cyan("  └──────────────────────────────────────────────────────┘"));
+  console.log("");
 }
