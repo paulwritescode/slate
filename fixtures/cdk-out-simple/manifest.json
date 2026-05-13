@@ -1,0 +1,12 @@
+{
+  "version": "36.0.0",
+  "artifacts": {
+    "TestStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://123456789012/us-east-1",
+      "properties": {
+        "templateFile": "TestStack.template.json"
+      }
+    }
+  }
+}

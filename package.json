@@ -1,0 +1,39 @@
+{
+  "name": "slate",
+  "version": "0.1.0",
+  "description": "Pre-deploy AWS cost estimation for CDK infrastructure",
+  "type": "module",
+  "bin": {
+    "slate": "./dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": ["aws", "cdk", "cost", "finops", "iac", "pricing"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-pricing": "3.750.0",
+    "@inquirer/prompts": "7.3.2",
+    "chalk": "5.4.1",
+    "commander": "13.1.0",
+    "js-yaml": "4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "22.13.10",
+    "tsup": "8.4.0",
+    "tsx": "4.19.3",
+    "typescript": "5.7.3",
+    "vitest": "3.0.9"
+  }
+}

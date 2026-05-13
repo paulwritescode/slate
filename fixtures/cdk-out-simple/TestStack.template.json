@@ -1,0 +1,60 @@
+{
+  "Resources": {
+    "MyDatabase": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "DBInstanceClass": "db.t3.micro",
+        "Engine": "mysql",
+        "AllocatedStorage": 20,
+        "MultiAZ": false
+      }
+    },
+    "MyNatGateway": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {}
+    },
+    "AuthFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": "AuthFunction",
+        "Runtime": "nodejs20.x",
+        "MemorySize": 256,
+        "Timeout": 30
+      }
+    },
+    "ProcessOrderFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": "ProcessOrderFunction",
+        "Runtime": "nodejs20.x",
+        "MemorySize": 512,
+        "Timeout": 60
+      }
+    },
+    "MainApi": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Name": "MainApi"
+      }
+    },
+    "UsersTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": "Users",
+        "BillingMode": "PAY_PER_REQUEST"
+      }
+    },
+    "AssetsBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "assets"
+      }
+    },
+    "UserPool": {
+      "Type": "AWS::Cognito::UserPool",
+      "Properties": {
+        "UserPoolName": "MainPool"
+      }
+    }
+  }
+}
