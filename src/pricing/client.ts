@@ -44,6 +44,16 @@ async function getResourcePrice(client: PricingClient, resource: FixedResource):
   if (type === "AWS::EKS::Cluster") return 73.0;
   if (type === "AWS::Route53::HostedZone") return 0.5;
   if (type === "AWS::ElasticLoadBalancingV2::LoadBalancer") return 16.43;
+  if (type === "AWS::RDS::DBInstance") {
+    const storageGb = Number(attributes.storageGb) || 20;
+    // Fallback: db.t3.micro ~$0.017/hr + gp2 storage
+    const hourly = attributes.instanceClass === "db.t3.medium" ? 0.068 : 0.017;
+    const multiAZ = attributes.multiAZ ? 2 : 1;
+    return Math.round((hourly * 730 * multiAZ + storageGb * 0.115) * 100) / 100;
+  }
+  if (type === "AWS::ElastiCache::CacheCluster") {
+    return Math.round(0.017 * 730 * (Number(attributes.numNodes) || 1) * 100) / 100;
+  }
 
   const cacheKey = `${type}:${JSON.stringify(attributes)}:${region}`;
   if (cache.has(cacheKey)) return cache.get(cacheKey)!;

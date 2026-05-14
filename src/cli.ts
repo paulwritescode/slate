@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { watch } from "node:fs";
 import { runEstimate } from "./estimate.js";
 import { runWizard } from "./wizard/index.js";
 import { initConfig } from "./config.js";
@@ -18,12 +19,23 @@ program
   .option("--ci", "CI mode — exit 1 on budget failure")
   .option("--no-free-tier", "Disable free tier deductions")
   .option("--json", "Output as JSON")
+  .option("--watch", "Re-run when cdk.out/ changes")
   .action(async (opts) => {
-    await runEstimate({
-      ci: opts.ci,
-      noFreeTier: !opts.freeTier,
-      json: opts.json,
-    });
+    const runOpts = { ci: opts.ci, noFreeTier: !opts.freeTier, json: opts.json };
+    await runEstimate(runOpts);
+
+    if (opts.watch) {
+      console.log("\n  👀 Watching cdk.out/ for changes...\n");
+      let debounce: ReturnType<typeof setTimeout> | null = null;
+      watch("cdk.out", { recursive: true }, () => {
+        if (debounce) clearTimeout(debounce);
+        debounce = setTimeout(async () => {
+          console.clear();
+          await runEstimate(runOpts);
+          console.log("\n  👀 Watching cdk.out/ for changes...\n");
+        }, 500);
+      });
+    }
   });
 
 program
@@ -52,9 +64,17 @@ program
 
 program
   .command("init")
-  .description("Create iac-cost.config.json with defaults")
+  .description("Create slate.config.json with defaults")
   .action(async () => {
     await initConfig();
+  });
+
+program
+  .command("mcp")
+  .description("Start MCP server for AI editor integration")
+  .action(async () => {
+    const { startMcpServer } = await import("./mcp/server.js");
+    await startMcpServer();
   });
 
 program.parse();

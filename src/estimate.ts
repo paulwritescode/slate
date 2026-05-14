@@ -22,14 +22,18 @@ export async function runEstimate(opts: EstimateOptions = {}): Promise<void> {
   const cdkOutPath = "cdk.out";
 
   if (!existsSync(cdkOutPath)) {
-    console.error(chalk.red("  ✗ cdk.out/ not found. Run `cdk synth` first."));
+    console.error(chalk.red("\n  ✗ cdk.out/ not found.\n"));
+    console.error(chalk.dim("    Run `cdk synth` to generate your CloudFormation output,"));
+    console.error(chalk.dim("    then run `slate estimate` again.\n"));
     process.exit(1);
   }
 
   // Step 1: Read CDK output
   const resources = await readCdkOut(cdkOutPath);
   if (resources.length === 0) {
-    console.error(chalk.yellow("  ⚠ No resources found in cdk.out/"));
+    console.error(chalk.yellow("\n  ⚠ No AWS resources found in cdk.out/\n"));
+    console.error(chalk.dim("    Check that your CDK app defines at least one stack with resources."));
+    console.error(chalk.dim("    Run `cdk synth` and verify cdk.out/ contains template files.\n"));
     return;
   }
 
@@ -50,9 +54,9 @@ export async function runEstimate(opts: EstimateOptions = {}): Promise<void> {
   const profile = await generateCostProfile(variable);
   const { empty, total } = countEmptyFields(profile);
 
-  // Step 5: Calculate tiers
+  // Step 5: Calculate tiers (uses profile values for exact pricing when available)
   const freeTierEnabled = !opts.noFreeTier;
-  const tiers = calculateTiers(pricedFixed, variable, config, freeTierEnabled);
+  const tiers = calculateTiers(pricedFixed, variable, config, freeTierEnabled, profile);
 
   // Step 6: Drift detection
   let drift: DriftResult | undefined;

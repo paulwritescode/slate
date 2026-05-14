@@ -37,4 +37,20 @@ describe("Calculator", () => {
       expect(tier.totalMin).toBe(Math.round((tier.fixedTotal + tier.variableMin) * 100) / 100);
     }
   });
+
+  it("produces exact costs (min === max) when profile is filled", () => {
+    const profile = {
+      lambda: { invocations_per_user_per_month: 120, avg_duration_ms: 250 },
+    };
+    const tiers = calculateTiers(fixed, variable, config, false, profile);
+    for (const tier of tiers) {
+      expect(tier.variableMin).toBe(tier.variableMax);
+    }
+  });
+
+  it("produces ranges (min !== max) when no profile", () => {
+    const tiers = calculateTiers(fixed, variable, config, false);
+    const lastTier = tiers[tiers.length - 1];
+    expect(lastTier.variableMin).not.toBe(lastTier.variableMax);
+  });
 });

@@ -1,6 +1,6 @@
 {
   "name": "slate-cost",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Pre-deploy AWS cost estimation for CDK infrastructure",
   "type": "module",
   "bin": {
@@ -17,7 +17,16 @@
     "lint": "tsc --noEmit",
     "postinstall": "node scripts/postinstall.js"
   },
-  "keywords": ["aws", "cdk", "cost", "finops", "iac", "pricing", "infrastructure", "estimate"],
+  "keywords": [
+    "aws",
+    "cdk",
+    "cost",
+    "finops",
+    "iac",
+    "pricing",
+    "infrastructure",
+    "estimate"
+  ],
   "license": "MIT",
   "author": "paulwritescode",
   "repository": {
